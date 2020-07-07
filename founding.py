@@ -10,12 +10,17 @@ dbconfig = {
     'db' : 'honestfeedback'
 }
 
-@app.route('/<business_name>', methods=['GET'])
+@app.route('/business/alias/<business_name>', methods=['GET'])
 def get_business(business_name = None):
     response = {
-        'status' : '',
-        'business-id' : '',
-        'business-name' : ''
+        'status' : {
+            'code': None,
+            'msg' : None
+        },
+        'business' : {
+            'id' : None,
+            'name' : None
+        }
     } 
 
     try:
@@ -27,22 +32,26 @@ def get_business(business_name = None):
         args = [business_name]
         cursor.execute(query, args)
 
-        exec_status = 'Select query successful'
-
         db_response = cursor.fetchall()
 
-        response['status'] = exec_status
-        response['business-id'] = db_response[0][0]
-        response['business-name'] = db_response[0][1]
-        print(exec_status)
+        print('Select query successful')
+        if(len(db_response) != 0):
+            response['business']['id'] = db_response[0][0]
+            response['business']['name'] = db_response[0][1]
+            response['status']['code'] = 200
+            response['status']['msg'] = 'Database search successful'
+        else:
+            response['status']['code'] = 404
+            response['status']['msg'] = 'None found'
     except mysql.connector.Error as err:
-        response['status'] = 'Select query unsuccessful'
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Something is wrong with your user name or password")
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
             print("Database does not exist")
         else:
             print(str(err.errno) + ': Select query unsuccessful with databse error: ' + err.msg)
+        response['status']['code'] = 500
+        response['status']['msg'] = 'Database search unsuccessful'
     finally:
         if (connection.is_connected()):
             cursor.close()
@@ -50,9 +59,14 @@ def get_business(business_name = None):
             print("MYSQL connection is closed")
         return response
 
-
-@app.route('/submission', methods=['PUT'])
+@app.route('/business/submission', methods=['PUT'])
 def send_submission():
+    response = {
+        'status' : {
+            'code': None,
+            'msg' : None
+        }
+    } 
     data = request.get_json()['data']
     business_id = data['business_id']
 
@@ -76,7 +90,6 @@ def send_submission():
     service_rating = service['rating']
     service_suggestion = service['suggestion']
 
-    exec_status = ''
     try:
         # Connection to the database
         connection = mysql.connector.connect(**dbconfig)
@@ -84,20 +97,22 @@ def send_submission():
         args = [business_id, price_category, price_rating, price_suggestion, quality_category, quality_rating, quality_suggestion, environment_category, environment_rating, environment_suggestion, service_category, service_rating, service_suggestion]
         cursor.callproc("insert_submission", args)
         connection.commit()
-        exec_status = 'Submission successful'
-        print(exec_status)
+        response['status']['code'] = 200
+        response['status']['msg'] = 'Submission successful'
+        print(response['status']['msg'])
     except mysql.connector.Error as err:
-        exec_status = 'Submission unsuccessful'
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Something is wrong with your user name or password")
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
             print("Database does not exist")
         else:
             print(str(err.errno) + ': Submission unsuccessful with databse error: ' + err.msg)
+        response['status']['code'] = 500
+        response['status']['msg'] = 'Submission unsuccessful'
     finally:
         if (connection.is_connected()):
             cursor.close()
             connection.close()
             print("MYSQL connection is closed")
-        return exec_status
+        return response
         
