@@ -4,10 +4,10 @@ from mysql.connector import errorcode
 
 app = Flask(__name__)
 dbconfig = {
-    'user' :'hf_founder',
-    'password' : 'HonestFeedback123',
+    'user' :'<fill_in>',
+    'password' : '<fill_in>',
     'host' : '127.0.0.1',
-    'db' : 'honestfeedback'
+    'db' : '<fill_in>'
 }
 
 @app.route('/business/alias/<business_name>', methods=['GET'])
