@@ -8,7 +8,7 @@
 
 Make sure the current directory has the ```founding.py```
 
-```python3 -m flask run```
+```python3 -m flask run -h 0.0.0.0```
 
 ## Test the API
 

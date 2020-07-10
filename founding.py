@@ -6,7 +6,7 @@ app = Flask(__name__)
 dbconfig = {
     'user' :'<fill_in>',
     'password' : '<fill_in>',
-    'host' : '127.0.0.1',
+    'host' : '<fill_in>',
     'db' : '<fill_in>'
 }
 
@@ -27,7 +27,7 @@ def get_business(business_name = None):
         # Connection to the database
         connection = mysql.connector.connect(**dbconfig)
         cursor = connection.cursor()
-        query = ("SELECT id, name FROM business WHERE name like %s")
+        query = ("SELECT id, name, alias FROM Business WHERE alias LIKE %s")
         business_name = business_name + "%"
         args = [business_name]
         cursor.execute(query, args)
