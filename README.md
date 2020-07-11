@@ -1,6 +1,6 @@
 # HF-FoundersAPI
 
-## Install require python packages
+## Install required python packages
 
 ```pip3 install -r requirements.txt```
 
